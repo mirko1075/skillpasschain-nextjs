@@ -36,7 +36,7 @@ export function AssessmentPage({ assessmentId }: AssessmentPageProps) {
         question: "What is the difference between 'let' and 'var' in JavaScript?",
         options: [
           "let is block-scoped, var is function-scoped",
-          "let is function-scoped, var is block-scoped", 
+          "let is function-scoped, var is block-scoped",
           "There is no difference",
           "let cannot be redeclared, var can be"
         ],
