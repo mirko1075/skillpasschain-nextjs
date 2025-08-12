@@ -1,4 +1,7 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3000/api/v1';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 
+  (process.env.NODE_ENV === 'production' 
+    ? 'https://skillpasschain-backend.onrender.com/api/v1'
+    : 'http://localhost:4000/api/v1');
 
 export const authService = {
   async login(email: string, password: string) {
