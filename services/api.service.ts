@@ -2,7 +2,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3000/api/
 
 class ApiService {
   private async request(endpoint: string, options: RequestInit = {}) {
-    const token = localStorage.getItem('accessToken');
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
     const url = `${API_BASE}${endpoint}`;
     
     const config: RequestInit = {
