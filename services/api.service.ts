@@ -1,0 +1,127 @@
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3000/api/v1';
+
+class ApiService {
+  private async request(endpoint: string, options: RequestInit = {}) {
+    const token = localStorage.getItem('accessToken');
+    const url = `${API_BASE}${endpoint}`;
+    
+    const config: RequestInit = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...options.headers,
+      },
+      ...options,
+    };
+
+    const response = await fetch(url, config);
+    
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.statusText}`);
+    }
+    
+    return response.json();
+  }
+
+  // Users
+  async getUsers() {
+    return this.request('/users');
+  }
+
+  async getUserById(id: string) {
+    return this.request(`/users/${id}`);
+  }
+
+  async createUser(data: any) {
+    return this.request('/users', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateUser(id: string, data: any) {
+    return this.request(`/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteUser(id: string) {
+    return this.request(`/users/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Institutions
+  async getInstitutions() {
+    return this.request('/institutions');
+  }
+
+  async createInstitution(data: any) {
+    return this.request('/institutions', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateInstitution(id: string, data: any) {
+    return this.request(`/institutions/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteInstitution(id: string) {
+    return this.request(`/institutions/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Assessments
+  async getAssessments() {
+    return this.request('/assessments');
+  }
+
+  async getUserAssessments(userId: string) {
+    return this.request(`/assessments/user/${userId}`);
+  }
+
+  async createAssessment(data: any) {
+    return this.request('/assessments', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async completeAssessment(id: string, score: number) {
+    return this.request(`/assessments/${id}/complete`, {
+      method: 'PUT',
+      body: JSON.stringify({ score }),
+    });
+  }
+
+  // Certifications
+  async getCertifications() {
+    return this.request('/certifications');
+  }
+
+  async getUserCertifications(userId: string) {
+    return this.request(`/certifications/user/${userId}`);
+  }
+
+  async createCertification(data: any) {
+    return this.request('/certifications', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateCertification(id: string, data: any) {
+    return this.request(`/certifications/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+}
+
+export const apiService = new ApiService();
