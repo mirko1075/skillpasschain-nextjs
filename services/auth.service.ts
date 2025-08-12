@@ -1,4 +1,5 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3000/api/v1';
+
 export const authService = {
   async login(email: string, password: string) {
     const response = await fetch(`${API_BASE}/auth/login`, {
@@ -13,7 +14,8 @@ export const authService = {
       throw new Error('Login failed');
     }
 
-    return response.json();
+    const data = await response.json();
+    return { data }; // Wrap in data object to match expected format
   },
 
   async register(data: { firstName: string; lastName: string; email: string; password: string; role?: string }) {
@@ -53,6 +55,7 @@ export const authService = {
       body: JSON.stringify({ refreshToken }),
     });
 
-    return response.json();
+    const data = await response.json();
+    return { data }; // Wrap in data object to match expected format
   },
 };

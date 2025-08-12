@@ -1,6 +1,6 @@
 import { authService } from './auth.service';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3000/api/v1';
 
 class ApiService {
   private async request(endpoint: string, options: RequestInit = {}) {
@@ -116,7 +116,9 @@ class ApiService {
   }
 
   async getUserAssessments(userId: string) {
-    return this.request(`/assessments/user/${userId}`);
+    // Note: This endpoint doesn't exist in the API spec, using mock data for now
+    // You may need to add this endpoint to the backend or use a different approach
+    return [];
   }
 
   async createAssessment(data: any) {
@@ -127,7 +129,7 @@ class ApiService {
   }
 
   async completeAssessment(id: string, score: number) {
-    return this.request(`/assessments/${id}/complete`, {
+    return this.request(`/assessments/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ score }),
     });
@@ -139,7 +141,9 @@ class ApiService {
   }
 
   async getUserCertifications(userId: string) {
-    return this.request(`/certifications/user/${userId}`);
+    // Note: This endpoint doesn't exist in the API spec, using mock data for now
+    // You may need to add this endpoint to the backend or use a different approach
+    return [];
   }
 
   async createCertification(data: any) {
@@ -186,7 +190,7 @@ class ApiService {
     formData.append('document', file);
     
     const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-    const response = await fetch(`${API_BASE}/topics/${topicId}/document`, {
+    const response = await fetch(`${API_BASE}/topics/${topicId}/upload`, {
       method: 'POST',
       headers: {
         ...(token && { Authorization: `Bearer ${token}` }),
@@ -199,6 +203,13 @@ class ApiService {
     }
     
     return response.json();
+  }
+
+  async updateTopicStatus(id: string, isActive: boolean) {
+    return this.request(`/topics/${id}/active`, {
+      method: 'PATCH',
+      body: JSON.stringify({ isActive }),
+    });
   }
 }
 
