@@ -32,20 +32,39 @@ interface Institution {
 export function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalInstitutions: 0,
+    totalAssessments: 0,
+    totalCertifications: 0
+  });
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [usersData, institutionsData] = await Promise.all([
+        const [usersData, institutionsData, assessmentsData, certificationsData] = await Promise.all([
           apiService.getUsers(),
-          apiService.getInstitutions()
+          apiService.getInstitutions(),
+          apiService.getAssessments(),
+          apiService.getCertifications()
         ]);
         setUsers(usersData);
         setInstitutions(institutionsData);
+        setStats({
+          totalUsers: usersData.length,
+          totalInstitutions: institutionsData.length,
+          totalAssessments: assessmentsData.length,
+          totalCertifications: certificationsData.length
+        });
       } catch (error) {
         console.error('Error fetching admin data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load admin dashboard data.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
@@ -53,17 +72,6 @@ export function AdminDashboard() {
 
     fetchData();
   }, []);
-
-  const mockUsers = [
-    { id: '1', firstName: 'John', lastName: 'Doe', email: 'john@example.com', role: 'user', createdAt: '2025-01-15' },
-    { id: '2', firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com', role: 'institution', createdAt: '2025-01-14' },
-    { id: '3', firstName: 'Admin', lastName: 'User', email: 'admin@skillpass.com', role: 'admin', createdAt: '2025-01-10' },
-  ];
-
-  const mockInstitutions = [
-    { id: '1', name: 'TechEd Institute', email: 'contact@teched.com', address: 'New York, NY', createdAt: '2025-01-10' },
-    { id: '2', name: 'CodeAcademy Pro', email: 'info@codeacademy.com', address: 'San Francisco, CA', createdAt: '2025-01-12' },
-  ];
 
   const handleDeleteUser = async (userId: string) => {
     try {
@@ -98,7 +106,7 @@ export function AdminDashboard() {
                 <Users className="w-8 h-8 text-blue-600 mr-3" />
                 <div>
                   <p className="text-sm font-medium text-blue-600">Total Users</p>
-                  <p className="text-2xl font-bold text-blue-900">1,247</p>
+                  <p className="text-2xl font-bold text-blue-900">{stats.totalUsers}</p>
                 </div>
               </div>
             </CardContent>
@@ -110,7 +118,7 @@ export function AdminDashboard() {
                 <Building2 className="w-8 h-8 text-teal-600 mr-3" />
                 <div>
                   <p className="text-sm font-medium text-teal-600">Institutions</p>
-                  <p className="text-2xl font-bold text-teal-900">28</p>
+                  <p className="text-2xl font-bold text-teal-900">{stats.totalInstitutions}</p>
                 </div>
               </div>
             </CardContent>
@@ -122,7 +130,7 @@ export function AdminDashboard() {
                 <BookOpen className="w-8 h-8 text-green-600 mr-3" />
                 <div>
                   <p className="text-sm font-medium text-green-600">Assessments</p>
-                  <p className="text-2xl font-bold text-green-900">4,892</p>
+                  <p className="text-2xl font-bold text-green-900">{stats.totalAssessments}</p>
                 </div>
               </div>
             </CardContent>
@@ -134,7 +142,7 @@ export function AdminDashboard() {
                 <Award className="w-8 h-8 text-purple-600 mr-3" />
                 <div>
                   <p className="text-sm font-medium text-purple-600">Certifications</p>
-                  <p className="text-2xl font-bold text-purple-900">2,156</p>
+                  <p className="text-2xl font-bold text-purple-900">{stats.totalCertifications}</p>
                 </div>
               </div>
             </CardContent>
@@ -173,6 +181,9 @@ export function AdminDashboard() {
               </div>
             </CardHeader>
             <CardContent>
+              {loading ? (
+                <div className="text-center py-4">Loading...</div>
+              ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -184,7 +195,7 @@ export function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockUsers.map((user) => (
+                  {users.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">
                         {user.firstName} {user.lastName}
@@ -215,6 +226,7 @@ export function AdminDashboard() {
                   ))}
                 </TableBody>
               </Table>
+              )}
             </CardContent>
           </Card>
 
@@ -248,6 +260,9 @@ export function AdminDashboard() {
               </div>
             </CardHeader>
             <CardContent>
+              {loading ? (
+                <div className="text-center py-4">Loading...</div>
+              ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -259,7 +274,7 @@ export function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockInstitutions.map((institution) => (
+                  {institutions.map((institution) => (
                     <TableRow key={institution.id}>
                       <TableCell className="font-medium">{institution.name}</TableCell>
                       <TableCell>{institution.email}</TableCell>
@@ -283,6 +298,7 @@ export function AdminDashboard() {
                   ))}
                 </TableBody>
               </Table>
+              )}
             </CardContent>
           </Card>
         </div>

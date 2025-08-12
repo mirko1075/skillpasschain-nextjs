@@ -7,44 +7,68 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { apiService } from '@/services/api.service';
+import { useAuth } from '@/providers/auth-provider';
+import { useToast } from '@/hooks/use-toast';
 import { BookOpen, Award, TrendingUp, Calendar } from 'lucide-react';
 
 export function UserDashboard() {
   const [assessments, setAssessments] = useState([]);
   const [certifications, setCertifications] = useState([]);
+  const [stats, setStats] = useState({
+    totalAssessments: 0,
+    totalCertifications: 0,
+    averageScore: 0,
+    thisMonth: 0
+  });
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchUserData = async () => {
+      if (!user?.id) return;
+      
       try {
-        // In a real app, you'd get the user ID from the auth context
-        const userId = 'current-user-id'; // Replace with actual user ID
         const [userAssessments, userCertifications] = await Promise.all([
-          apiService.getUserAssessments(userId),
-          apiService.getUserCertifications(userId)
+          apiService.getUserAssessments(user.id),
+          apiService.getUserCertifications(user.id)
         ]);
         setAssessments(userAssessments);
         setCertifications(userCertifications);
+        
+        // Calculate stats from real data
+        const completedAssessments = userAssessments.filter(a => a.status === 'completed');
+        const avgScore = completedAssessments.length > 0 
+          ? Math.round(completedAssessments.reduce((sum, a) => sum + a.score, 0) / completedAssessments.length)
+          : 0;
+        
+        const thisMonth = userAssessments.filter(a => {
+          const assessmentDate = new Date(a.date || a.createdAt);
+          const now = new Date();
+          return assessmentDate.getMonth() === now.getMonth() && 
+                 assessmentDate.getFullYear() === now.getFullYear();
+        }).length;
+        
+        setStats({
+          totalAssessments: userAssessments.length,
+          totalCertifications: userCertifications.length,
+          averageScore: avgScore,
+          thisMonth
+        });
       } catch (error) {
         console.error('Error fetching user data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load dashboard data.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchUserData();
-  }, []);
-
-  const mockAssessments = [
-    { id: '1', title: 'JavaScript Fundamentals', score: 85, status: 'completed', date: '2025-01-15' },
-    { id: '2', title: 'React Development', score: 0, status: 'pending', date: null },
-    { id: '3', title: 'Node.js Backend', score: 92, status: 'completed', date: '2025-01-10' },
-  ];
-
-  const mockCertifications = [
-    { id: '1', title: 'JavaScript Developer', institution: 'TechEd Institute', date: '2025-01-15' },
-    { id: '2', title: 'Full Stack Developer', institution: 'CodeAcademy Pro', date: '2025-01-10' },
-  ];
+  }, [user?.id, toast]);
 
   return (
     <DashboardLayout>
@@ -62,7 +86,7 @@ export function UserDashboard() {
                 <BookOpen className="w-8 h-8 text-blue-600 mr-3" />
                 <div>
                   <p className="text-sm font-medium text-blue-600">Assessments</p>
-                  <p className="text-2xl font-bold text-blue-900">12</p>
+                  <p className="text-2xl font-bold text-blue-900">{stats.totalAssessments}</p>
                 </div>
               </div>
             </CardContent>
@@ -74,7 +98,7 @@ export function UserDashboard() {
                 <Award className="w-8 h-8 text-teal-600 mr-3" />
                 <div>
                   <p className="text-sm font-medium text-teal-600">Certifications</p>
-                  <p className="text-2xl font-bold text-teal-900">5</p>
+                  <p className="text-2xl font-bold text-teal-900">{stats.totalCertifications}</p>
                 </div>
               </div>
             </CardContent>
@@ -86,7 +110,7 @@ export function UserDashboard() {
                 <TrendingUp className="w-8 h-8 text-green-600 mr-3" />
                 <div>
                   <p className="text-sm font-medium text-green-600">Avg. Score</p>
-                  <p className="text-2xl font-bold text-green-900">89%</p>
+                  <p className="text-2xl font-bold text-green-900">{stats.averageScore}%</p>
                 </div>
               </div>
             </CardContent>
@@ -98,7 +122,7 @@ export function UserDashboard() {
                 <Calendar className="w-8 h-8 text-purple-600 mr-3" />
                 <div>
                   <p className="text-sm font-medium text-purple-600">This Month</p>
-                  <p className="text-2xl font-bold text-purple-900">3</p>
+                  <p className="text-2xl font-bold text-purple-900">{stats.thisMonth}</p>
                 </div>
               </div>
             </CardContent>
@@ -115,8 +139,11 @@ export function UserDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
+              {loading ? (
+                <div className="text-center py-4">Loading...</div>
+              ) : (
               <div className="space-y-4">
-                {mockAssessments.map((assessment) => (
+                {assessments.length > 0 ? assessments.map((assessment) => (
                   <div key={assessment.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex-1">
                       <h3 className="font-medium">{assessment.title}</h3>
@@ -141,8 +168,13 @@ export function UserDashboard() {
                       </Button>
                     )}
                   </div>
-                ))}
+                )) : (
+                  <div className="text-center py-8 text-gray-500">
+                    No assessments found. Start your first assessment!
+                  </div>
+                )}
               </div>
+              )}
             </CardContent>
           </Card>
 
@@ -155,20 +187,28 @@ export function UserDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
+              {loading ? (
+                <div className="text-center py-4">Loading...</div>
+              ) : (
               <div className="space-y-4">
-                {mockCertifications.map((cert) => (
+                {certifications.length > 0 ? certifications.map((cert) => (
                   <div key={cert.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <h3 className="font-medium">{cert.title}</h3>
                       <p className="text-sm text-gray-600">Issued by {cert.institution}</p>
-                      <p className="text-sm text-gray-500">Earned on {cert.date}</p>
+                      <p className="text-sm text-gray-500">Earned on {cert.issueDate || cert.date}</p>
                     </div>
                     <Button variant="outline" size="sm">
                       View
                     </Button>
                   </div>
-                ))}
+                )) : (
+                  <div className="text-center py-8 text-gray-500">
+                    No certifications yet. Complete assessments to earn certifications!
+                  </div>
+                )}
               </div>
+              )}
             </CardContent>
           </Card>
         </div>
