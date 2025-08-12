@@ -1,16 +1,32 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  experimental: {
+    appDir: true,
+  },
+  // For Netlify deployment - don't use static export for dynamic apps
   trailingSlash: true,
+  
+  // Webpack config to handle the Progress component issue
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@radix-ui/react-progress': false,
+    }
+    
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      '@radix-ui/react-progress': false,
+    }
+    
+    return config
+  },
+  
+  swcMinify: true,
+  
+  // Images optimization for Netlify
   images: {
     unoptimized: true
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  env: {
-    NEXT_PUBLIC_API_BASE: process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3000/api/v1',
-  },
-};
+  }
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig
