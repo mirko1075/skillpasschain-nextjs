@@ -1,4 +1,7 @@
+import { authService } from './auth.service';
+
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+
 class ApiService {
   private async request(endpoint: string, options: RequestInit = {}) {
     const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
@@ -13,7 +16,35 @@ class ApiService {
       ...options,
     };
 
-    const response = await fetch(url, config);
+    let response = await fetch(url, config);
+    
+    // If token is expired (401), try to refresh it
+    if (response.status === 401 && token) {
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (refreshToken) {
+        try {
+          const refreshResponse = await authService.refreshToken(refreshToken);
+          if (refreshResponse.accessToken) {
+            localStorage.setItem('accessToken', refreshResponse.accessToken);
+            localStorage.setItem('refreshToken', refreshResponse.refreshToken);
+            
+            // Retry the original request with new token
+            config.headers = {
+              ...config.headers,
+              Authorization: `Bearer ${refreshResponse.accessToken}`,
+            };
+            response = await fetch(url, config);
+          }
+        } catch (error) {
+          // Refresh failed, redirect to login
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('userData');
+          window.location.href = '/login';
+          throw new Error('Session expired');
+        }
+      }
+    }
     
     if (!response.ok) {
       throw new Error(`API Error: ${response.statusText}`);

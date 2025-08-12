@@ -27,20 +27,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  const isTokenExpired = (token: string) => {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return Date.now() >= payload.exp * 1000;
+    } catch {
+      return true;
+    }
+  };
+
+  const refreshUserSession = async () => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) return false;
+
+    try {
+      const response = await authService.refreshToken(refreshToken);
+      if (response.user && response.accessToken) {
+        setUser(response.user);
+        localStorage.setItem('accessToken', response.accessToken);
+        localStorage.setItem('refreshToken', response.refreshToken);
+        localStorage.setItem('userData', JSON.stringify(response.user));
+        return true;
+      }
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      // Clear invalid tokens
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('userData');
+    }
+    return false;
+  };
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem('accessToken');
       const userData = localStorage.getItem('userData');
       
       if (token && userData && userData !== 'undefined') {
-        try {
-          const parsedUser = JSON.parse(userData);
-          setUser(parsedUser);
-        } catch (error) {
-          console.error('Error parsing stored user data:', error);
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('userData');
+        // Check if token is expired
+        if (isTokenExpired(token)) {
+          // Try to refresh the token
+          const refreshed = await refreshUserSession();
+          if (!refreshed) {
+            setLoading(false);
+            return;
+          }
+        } else {
+          // Token is still valid, restore user session
+          try {
+            const parsedUser = JSON.parse(userData);
+            setUser(parsedUser);
+          } catch (error) {
+            console.error('Error parsing stored user data:', error);
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('userData');
+          }
         }
       }
       setLoading(false);
@@ -49,6 +91,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initializeAuth();
   }, []);
 
+  // Set up automatic token refresh
+  useEffect(() => {
+    if (!user) return;
+
+    const checkTokenExpiry = async () => {
+      const token = localStorage.getItem('accessToken');
+      if (token && isTokenExpired(token)) {
+        const refreshed = await refreshUserSession();
+        if (!refreshed) {
+          logout();
+        }
+      }
+    };
+
+    // Check token expiry every 5 minutes
+    const interval = setInterval(checkTokenExpiry, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, [user]);
   const login = async (email: string, password: string) => {
     const {data} = await authService.login(email, password);
     if (data.user && data.accessToken) {
@@ -78,10 +139,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
+    authService.logout().catch(console.error);
     setUser(null);
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('userData');
+    router.push('/');
   };
 
   return (
