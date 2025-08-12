@@ -55,10 +55,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('refreshToken', response.refreshToken);
       localStorage.setItem('userData', JSON.stringify(response.user));
       
-      // Force redirect after state update
-      setTimeout(() => {
-        window.location.href = '/dashboard';
-      }, 100);
+      // Redirect based on user role immediately
+      const redirectPath = response.user.role === 'admin' 
+        ? '/dashboard/admin' 
+        : response.user.role === 'institution' 
+        ? '/dashboard/institution' 
+        : '/dashboard/user';
+      
+      window.location.href = redirectPath;
     }
   };
 

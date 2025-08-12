@@ -87,13 +87,14 @@ export function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="h-12 pr-12"
+                    style={{ height: '48px', paddingRight: '48px' }}
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-12 px-3"
+                    className="absolute right-0 top-0 px-3"
+                    style={{ height: '48px' }}
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (

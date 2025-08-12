@@ -85,7 +85,7 @@ export function RegisterPage() {
                     value={formData.firstName}
                     onChange={(e) => handleInputChange('firstName', e.target.value)}
                     required
-                    className="h-12"
+                    style={{ height: '48px' }}
                   />
                 </div>
                 <div className="space-y-2">
@@ -96,7 +96,7 @@ export function RegisterPage() {
                     value={formData.lastName}
                     onChange={(e) => handleInputChange('lastName', e.target.value)}
                     required
-                    className="h-12"
+                    style={{ height: '48px' }}
                   />
                 </div>
               </div>
@@ -109,7 +109,7 @@ export function RegisterPage() {
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   required
-                  className="h-12"
+                  style={{ height: '48px' }}
                 />
               </div>
               <div className="space-y-2">
@@ -122,13 +122,14 @@ export function RegisterPage() {
                     value={formData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
                     required
-                    className="h-12 pr-12"
+                    style={{ height: '48px', paddingRight: '48px' }}
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-12 px-3"
+                    className="absolute right-0 top-0 px-3"
+                    style={{ height: '48px' }}
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
@@ -142,7 +143,7 @@ export function RegisterPage() {
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
                 <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value)}>
-                  <SelectTrigger className="h-12">
+                  <SelectTrigger style={{ height: '48px' }}>
                     <SelectValue placeholder="Select your role" />
                   </SelectTrigger>
                   <SelectContent>
