@@ -26,14 +26,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      // Here you would typically validate the token and get user info
-      // For now, we'll just set loading to false
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('accessToken');
+      const userData = localStorage.getItem('userData');
+      
+      if (token && userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+        } catch (error) {
+          console.error('Error parsing stored user data:', error);
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('userData');
+        }
+      }
       setLoading(false);
-    } else {
-      setLoading(false);
-    }
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -41,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(response.user);
     localStorage.setItem('accessToken', response.accessToken);
     localStorage.setItem('refreshToken', response.refreshToken);
+    localStorage.setItem('userData', JSON.stringify(response.user));
   };
 
   const register = async (data: { firstName: string; lastName: string; email: string; password: string; role?: string }) => {
@@ -48,12 +60,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(response.user);
     localStorage.setItem('accessToken', response.accessToken);
     localStorage.setItem('refreshToken', response.refreshToken);
+    localStorage.setItem('userData', JSON.stringify(response.user));
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userData');
   };
 
   return (
