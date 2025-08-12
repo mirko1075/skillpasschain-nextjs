@@ -10,26 +10,27 @@ export function DashboardRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.push('/login');
-      } else {
-        // Redirect based on user role
-        switch (user.role) {
-          case 'admin':
-            router.push('/dashboard/admin');
-            break;
-          case 'institution':
-            router.push('/dashboard/institution');
-            break;
-          default:
-            router.push('/dashboard/user');
-            break;
-        }
-      }
+    if (!loading && user) {
+      // Redirect based on user role
+      const redirectPath = user.role === 'admin' 
+        ? '/dashboard/admin' 
+        : user.role === 'institution' 
+        ? '/dashboard/institution' 
+        : '/dashboard/user';
+      
+      window.location.href = redirectPath;
+    } else if (!loading && !user) {
+      window.location.href = '/login';
     }
   }, [user, loading, router]);
 
+  if (!loading && !user) {
+    return null; // Will redirect to login
+  }
+
+  if (!loading && user) {
+    return null; // Will redirect to appropriate dashboard
+  }
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
