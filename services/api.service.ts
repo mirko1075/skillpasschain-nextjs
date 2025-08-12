@@ -1,8 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 
-  (process.env.NODE_ENV === 'production' 
-    ? 'https://skillpasschain-backend.onrender.com/api/v1'
-    : 'http://localhost:4000/api/v1');
-
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
 class ApiService {
   private async request(endpoint: string, options: RequestInit = {}) {
     const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;

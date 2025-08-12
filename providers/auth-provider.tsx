@@ -48,17 +48,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await authService.login(email, password);
-    if (response.user && response.accessToken) {
-      setUser(response.user);
-      localStorage.setItem('accessToken', response.accessToken);
-      localStorage.setItem('refreshToken', response.refreshToken);
-      localStorage.setItem('userData', JSON.stringify(response.user));
-      
+    const {data} = await authService.login(email, password);
+    if (data.user && data.accessToken) {
+      setUser(data.user);
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      localStorage.setItem('userData', JSON.stringify(data.user));
+
       // Redirect based on user role immediately
-      const redirectPath = response.user.role === 'admin' 
+      const redirectPath = data.user.role === 'admin' 
         ? '/dashboard/admin' 
-        : response.user.role === 'institution' 
+        : data.user.role === 'institution' 
         ? '/dashboard/institution' 
         : '/dashboard/user';
       
