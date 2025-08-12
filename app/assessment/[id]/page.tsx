@@ -1,5 +1,3 @@
-'use client';
-
 import { AssessmentPage } from '@/components/assessment/assessment-page';
 
 export async function generateStaticParams() {
