@@ -110,7 +110,7 @@ export function LandingPage() {
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-gray-900">Multi-Role Platform</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Whether you're a learner, educator, or institution administrator, our platform adapts to your specific needs and workflow.
+                  Whether you&apos;re a learner, educator, or institution administrator, our platform adapts to your specific needs and workflow.
                 </p>
               </CardContent>
             </Card>
