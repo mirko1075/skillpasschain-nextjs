@@ -155,6 +155,51 @@ class ApiService {
       body: JSON.stringify(data),
     });
   }
+
+  // Topics
+  async getTopics() {
+    return this.request('/topics');
+  }
+
+  async createTopic(data: any) {
+    return this.request('/topics', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateTopic(id: string, data: any) {
+    return this.request(`/topics/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteTopic(id: string) {
+    return this.request(`/topics/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async uploadTopicDocument(topicId: string, file: File) {
+    const formData = new FormData();
+    formData.append('document', file);
+    
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    const response = await fetch(`${API_BASE}/topics/${topicId}/document`, {
+      method: 'POST',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.statusText}`);
+    }
+    
+    return response.json();
+  }
 }
 
 export const apiService = new ApiService();
