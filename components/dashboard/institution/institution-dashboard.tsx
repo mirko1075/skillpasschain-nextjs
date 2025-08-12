@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { apiService } from '@/services/api.service';
+import { useAuth } from '@/providers/auth-provider';
 import { Award, Users, FileText, TrendingUp, Plus, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 

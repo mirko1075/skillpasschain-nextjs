@@ -9,6 +9,7 @@ import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { apiService } from '@/services/api.service';
 import { useAuth } from '@/providers/auth-provider';
 import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 import { BookOpen, Award, TrendingUp, Calendar } from 'lucide-react';
 
 export function UserDashboard() {
@@ -23,6 +24,7 @@ export function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -219,6 +221,9 @@ export function UserDashboard() {
             <CardTitle>Available Assessments</CardTitle>
           </CardHeader>
           <CardContent>
+            {loading ? (
+              <div className="text-center py-4">Loading...</div>
+            ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
                 { title: 'Python Programming', level: 'Intermediate', duration: '45 min' },
@@ -231,12 +236,16 @@ export function UserDashboard() {
                     <span>{assessment.level}</span>
                     <span>{assessment.duration}</span>
                   </div>
-                  <Button className="w-full bg-gradient-to-r from-blue-600 to-teal-600">
+                  <Button 
+                    className="w-full bg-gradient-to-r from-blue-600 to-teal-600"
+                    onClick={() => router.push(`/assessment/${index + 1}`)}
+                  >
                     Start Assessment
                   </Button>
                 </div>
               ))}
             </div>
+            )}
           </CardContent>
         </Card>
       </div>
