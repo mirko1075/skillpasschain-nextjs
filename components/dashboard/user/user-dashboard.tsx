@@ -70,7 +70,7 @@ export function UserDashboard() {
     };
 
     fetchUserData();
-  }, [user?.id, toast]);
+  }, [user?._id, toast]);
 
   return (
     <DashboardLayout>

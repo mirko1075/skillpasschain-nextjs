@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/services/auth.service';
 
@@ -62,35 +62,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async () => {
       const token = localStorage.getItem('accessToken');
       const userData = localStorage.getItem('userData');
-      
-      if (token && userData && userData !== 'undefined') {
-        try {
-          const parsedUser = JSON.parse(userData);
-          if (refreshResponse.data && refreshResponse.data.accessToken) {
-            localStorage.setItem('accessToken', refreshResponse.data.accessToken);
-            localStorage.setItem('refreshToken', refreshResponse.data.refreshToken);
-            if (refreshResponse.data.user) {
-              setUser(refreshResponse.data.user);
-              localStorage.setItem('userData', JSON.stringify(refreshResponse.data.user));
-            }
-            // Try to refresh the token
-            const refreshed = await refreshUserSession();
-            if (!refreshed) {
-              // Clear invalid data and set loading to false
-              localStorage.removeItem('accessToken');
-              localStorage.removeItem('refreshToken');
-              localStorage.removeItem('userData');
-              setLoading(false);
-              return;
-            }
-          } else {
-            // Token is still valid, restore user session
-            setUser(parsedUser);
-          }
-        } catch (error) {
-          console.error('Error parsing stored user data:', error);
+      // If we have a token, always try to refresh it for session persistence
+      if (token) {
+        const refreshed = await refreshUserSession();
+        if (refreshed) {
+          setLoading(false);
+          return;
+        } else {
+          // If refresh fails, clear everything
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
+          localStorage.removeItem('userData');
+        }
+      }
+      // If no token or refresh failed, try to restore user from userData (for SSR or fallback)
+      if (userData && userData !== 'undefined') {
+        try {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+        } catch (error) {
+          console.error('Error parsing stored user data:', error);
           localStorage.removeItem('userData');
         }
       }
@@ -147,14 +138,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     authService.logout().catch(console.error);
     setUser(null);
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('userData');
     router.push('/');
-  };
+  }, [router]);
 
   return (
     <AuthContext.Provider value={{ user, login, register, logout, loading }}>
