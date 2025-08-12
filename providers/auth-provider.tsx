@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token = localStorage.getItem('accessToken');
       const userData = localStorage.getItem('userData');
       
-      if (token && userData) {
+      if (token && userData && userData !== 'undefined') {
         try {
           const parsedUser = JSON.parse(userData);
           setUser(parsedUser);
@@ -49,18 +49,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     const response = await authService.login(email, password);
-    setUser(response.user);
-    localStorage.setItem('accessToken', response.accessToken);
-    localStorage.setItem('refreshToken', response.refreshToken);
-    localStorage.setItem('userData', JSON.stringify(response.user));
+    if (response.user && response.accessToken) {
+      setUser(response.user);
+      localStorage.setItem('accessToken', response.accessToken);
+      localStorage.setItem('refreshToken', response.refreshToken);
+      localStorage.setItem('userData', JSON.stringify(response.user));
+    }
   };
 
   const register = async (data: { firstName: string; lastName: string; email: string; password: string; role?: string }) => {
     const response = await authService.register(data);
-    setUser(response.user);
-    localStorage.setItem('accessToken', response.accessToken);
-    localStorage.setItem('refreshToken', response.refreshToken);
-    localStorage.setItem('userData', JSON.stringify(response.user));
+    if (response.user && response.accessToken) {
+      setUser(response.user);
+      localStorage.setItem('accessToken', response.accessToken);
+      localStorage.setItem('refreshToken', response.refreshToken);
+      localStorage.setItem('userData', JSON.stringify(response.user));
+    }
   };
 
   const logout = () => {
