@@ -42,11 +42,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const response = await authService.refreshToken(refreshToken);
-      if (response.user && response.accessToken) {
-        setUser(response.user);
-        localStorage.setItem('accessToken', response.accessToken);
-        localStorage.setItem('refreshToken', response.refreshToken);
-        localStorage.setItem('userData', JSON.stringify(response.user));
+      if (response.data && response.data.user && response.data.accessToken) {
+        setUser(response.data.user);
+        localStorage.setItem('accessToken', response.data.accessToken);
+        localStorage.setItem('refreshToken', response.data.refreshToken);
+        localStorage.setItem('userData', JSON.stringify(response.data.user));
         return true;
       }
     } catch (error) {
@@ -64,25 +64,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userData = localStorage.getItem('userData');
       
       if (token && userData && userData !== 'undefined') {
-        // Check if token is expired
-        if (isTokenExpired(token)) {
-          // Try to refresh the token
-          const refreshed = await refreshUserSession();
-          if (!refreshed) {
-            setLoading(false);
-            return;
-          }
-        } else {
-          // Token is still valid, restore user session
-          try {
-            const parsedUser = JSON.parse(userData);
+        try {
+          const parsedUser = JSON.parse(userData);
+          if (refreshResponse.data && refreshResponse.data.accessToken) {
+            localStorage.setItem('accessToken', refreshResponse.data.accessToken);
+            localStorage.setItem('refreshToken', refreshResponse.data.refreshToken);
+            if (refreshResponse.data.user) {
+              setUser(refreshResponse.data.user);
+              localStorage.setItem('userData', JSON.stringify(refreshResponse.data.user));
+            }
+            // Try to refresh the token
+            const refreshed = await refreshUserSession();
+            if (!refreshed) {
+              // Clear invalid data and set loading to false
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('refreshToken');
+              localStorage.removeItem('userData');
+              setLoading(false);
+              return;
+            }
+          } else {
+            // Token is still valid, restore user session
             setUser(parsedUser);
-          } catch (error) {
-            console.error('Error parsing stored user data:', error);
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('userData');
           }
+        } catch (error) {
+          console.error('Error parsing stored user data:', error);
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('userData');
         }
       }
       setLoading(false);

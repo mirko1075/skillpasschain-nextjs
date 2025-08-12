@@ -24,14 +24,17 @@ class ApiService {
       if (refreshToken) {
         try {
           const refreshResponse = await authService.refreshToken(refreshToken);
-          if (refreshResponse.accessToken) {
-            localStorage.setItem('accessToken', refreshResponse.accessToken);
-            localStorage.setItem('refreshToken', refreshResponse.refreshToken);
+          if (refreshResponse.data && refreshResponse.data.accessToken) {
+            localStorage.setItem('accessToken', refreshResponse.data.accessToken);
+            localStorage.setItem('refreshToken', refreshResponse.data.refreshToken);
+            if (refreshResponse.data.user) {
+              localStorage.setItem('userData', JSON.stringify(refreshResponse.data.user));
+            }
             
             // Retry the original request with new token
             config.headers = {
               ...config.headers,
-              Authorization: `Bearer ${refreshResponse.accessToken}`,
+              Authorization: `Bearer ${refreshResponse.data.accessToken}`,
             };
             response = await fetch(url, config);
           }
