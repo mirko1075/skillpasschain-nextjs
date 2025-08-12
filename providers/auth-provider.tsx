@@ -118,13 +118,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('refreshToken', data.refreshToken);
       localStorage.setItem('userData', JSON.stringify(data.user));
 
-      // Redirect based on user role using window.location for immediate redirect
+      // Redirect based on user role using Next.js router
       const redirectPath = data.user.role === 'admin' 
         ? '/dashboard/admin' 
         : data.user.role === 'institution' 
         ? '/dashboard/institution' 
         : '/dashboard/user';
-      window.location.href = redirectPath;
+      router.push(redirectPath);
     }
   };
 
