@@ -30,7 +30,6 @@ export function LoginPage() {
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
-      router.push('/dashboard');
     } catch (error) {
       toast({
         title: "Login failed",

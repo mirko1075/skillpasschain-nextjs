@@ -54,6 +54,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('accessToken', response.accessToken);
       localStorage.setItem('refreshToken', response.refreshToken);
       localStorage.setItem('userData', JSON.stringify(response.user));
+      
+      // Force redirect after state update
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 100);
     }
   };
 
