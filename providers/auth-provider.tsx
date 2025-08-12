@@ -1,10 +1,11 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { authService } from '@/services/auth.service';
 
 interface User {
-  id: string;
+  _id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -24,6 +25,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -55,14 +57,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('refreshToken', data.refreshToken);
       localStorage.setItem('userData', JSON.stringify(data.user));
 
-      // Redirect based on user role immediately
+      // Redirect based on user role using Next.js router
       const redirectPath = data.user.role === 'admin' 
         ? '/dashboard/admin' 
         : data.user.role === 'institution' 
         ? '/dashboard/institution' 
         : '/dashboard/user';
-      
-      window.location.href = redirectPath;
+      router.push(redirectPath);
     }
   };
 

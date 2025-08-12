@@ -28,23 +28,23 @@ export function UserDashboard() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      if (!user?.id) return;
+      if (!user?._id) return;
       
       try {
         const [userAssessments, userCertifications] = await Promise.all([
-          apiService.getUserAssessments(user.id),
-          apiService.getUserCertifications(user.id)
+          apiService.getUserAssessments(user._id),
+          apiService.getUserCertifications(user._id)
         ]);
         setAssessments(userAssessments);
         setCertifications(userCertifications);
         
         // Calculate stats from real data
-        const completedAssessments = userAssessments.filter(a => a.status === 'completed');
+        const completedAssessments = userAssessments.filter((a: { status: string; }) => a.status === 'completed');
         const avgScore = completedAssessments.length > 0 
-          ? Math.round(completedAssessments.reduce((sum, a) => sum + a.score, 0) / completedAssessments.length)
+          ? Math.round(completedAssessments.reduce((sum: any, a: { score: any; }) => sum + a.score, 0) / completedAssessments.length)
           : 0;
         
-        const thisMonth = userAssessments.filter(a => {
+        const thisMonth = userAssessments.filter((a: { date: any; createdAt: any; }) => {
           const assessmentDate = new Date(a.date || a.createdAt);
           const now = new Date();
           return assessmentDate.getMonth() === now.getMonth() && 
