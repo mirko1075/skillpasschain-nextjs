@@ -1,0 +1,761 @@
+openapi: 3.1.0
+info:
+  title: SkillPassChain API
+  version: 1.0.0
+  description: |
+    Production-ready OpenAPI 3.1 spec for the SkillPassChain backend. All endpoints are under `/api/v1`.
+    This API manages users, institutions, assessments, certifications, topics, and authentication.
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development
+  - url: https://your-production-domain.com/api/v1
+    description: Production
+security:
+  - bearerAuth: []
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterUserInput'
+            example:
+              firstName: John
+              lastName: Doe
+              email: john@example.com
+              password: password123
+      responses:
+        '201':
+          description: User registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /auth/login:
+    post:
+      summary: Login
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+            example:
+              email: john@example.com
+              password: password123
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /auth/refresh:
+    post:
+      summary: Refresh access token
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+              required: [refreshToken]
+            example:
+              refreshToken: <refresh_token>
+      responses:
+        '200':
+          description: New access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessToken'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /auth/logout:
+    post:
+      summary: Logout
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Logged out
+  /users:
+    post:
+      summary: Create user
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterUserInput'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    get:
+      summary: Get all users
+      tags: [Users]
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  /users/{id}:
+    get:
+      summary: Get user by ID
+      tags: [Users]
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      summary: Update user
+      tags: [Users]
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserInput'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete user
+      tags: [Users]
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: User deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /institutions:
+    post:
+      summary: Create institution
+      tags: [Institutions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstitutionInput'
+      responses:
+        '201':
+          description: Institution created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Institution'
+    get:
+      summary: Get all institutions
+      tags: [Institutions]
+      responses:
+        '200':
+          description: List of institutions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Institution'
+  /institutions/{id}:
+    get:
+      summary: Get institution by ID
+      tags: [Institutions]
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Institution found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Institution'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      summary: Update institution
+      tags: [Institutions]
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstitutionInput'
+      responses:
+        '200':
+          description: Institution updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Institution'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete institution
+      tags: [Institutions]
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Institution deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /assessments:
+    post:
+      summary: Create assessment
+      tags: [Assessments]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssessmentInput'
+      responses:
+        '201':
+          description: Assessment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assessment'
+    get:
+      summary: Get all assessments
+      tags: [Assessments]
+      responses:
+        '200':
+          description: List of assessments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Assessment'
+  /assessments/{id}:
+    get:
+      summary: Get assessment by ID
+      tags: [Assessments]
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Assessment found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assessment'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      summary: Update assessment
+      tags: [Assessments]
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssessmentInput'
+      responses:
+        '200':
+          description: Assessment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assessment'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete assessment
+      tags: [Assessments]
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Assessment deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /certifications:
+    post:
+      summary: Create certification
+      tags: [Certifications]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificationInput'
+      responses:
+        '201':
+          description: Certification created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certification'
+    get:
+      summary: Get all certifications
+      tags: [Certifications]
+      responses:
+        '200':
+          description: List of certifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Certification'
+  /certifications/{id}:
+    get:
+      summary: Get certification by ID
+      tags: [Certifications]
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Certification found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certification'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      summary: Update certification
+      tags: [Certifications]
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificationInput'
+      responses:
+        '200':
+          description: Certification updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certification'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete certification
+      tags: [Certifications]
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Certification deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /topics:
+    post:
+      summary: Create topic
+      tags: [Topics]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopicInput'
+      responses:
+        '201':
+          description: Topic created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+    get:
+      summary: Get all topics
+      tags: [Topics]
+      responses:
+        '200':
+          description: List of topics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Topic'
+  /topics/{id}:
+    get:
+      summary: Get topic by ID
+      tags: [Topics]
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Topic found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      summary: Update topic
+      tags: [Topics]
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopicInput'
+      responses:
+        '200':
+          description: Topic updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete topic
+      tags: [Topics]
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Topic deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /topics/{id}/active:
+    patch:
+      summary: Activate/deactivate topic
+      tags: [Topics]
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isActive:
+                  type: boolean
+              required: [isActive]
+            example:
+              isActive: false
+      responses:
+        '200':
+          description: Topic updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /topics/{id}/upload:
+    post:
+      summary: Upload document for topic
+      tags: [Topics]
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                documentUrl:
+                  type: string
+                  format: uri
+              required: [documentUrl]
+            example:
+              documentUrl: https://example.com/doc.pdf
+      responses:
+        '200':
+          description: Topic updated with document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^[a-fA-F0-9]{24}$'
+      description: MongoDB ObjectId
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 507f1f77bcf86cd799439011
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        role:
+          type: string
+          example: user
+      required: [id, firstName, lastName, email, role]
+    RegisterUserInput:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required: [firstName, lastName, email, password]
+    UpdateUserInput:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+      required: []
+    Institution:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 507f1f77bcf86cd799439012
+        name:
+          type: string
+          example: Harvard University
+        email:
+          type: string
+          format: email
+          example: contact@harvard.edu
+        address:
+          type: string
+          example: Cambridge, MA
+      required: [id, name, email, address]
+    InstitutionInput:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        address:
+          type: string
+      required: [name, email, address]
+    Assessment:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 507f1f77bcf86cd799439013
+        title:
+          type: string
+          example: JavaScript Fundamentals
+        score:
+          type: integer
+          example: 95
+        takenBy:
+          type: string
+          example: John Doe
+        createdBy:
+          type: string
+          example: 507f1f77bcf86cd799439011
+      required: [id, title, score, takenBy, createdBy]
+    AssessmentInput:
+      type: object
+      properties:
+        title:
+          type: string
+        score:
+          type: integer
+        takenBy:
+          type: string
+        createdBy:
+          type: string
+      required: [title, score, takenBy, createdBy]
+    Certification:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 507f1f77bcf86cd799439014
+        title:
+          type: string
+          example: Blockchain Developer
+        issuedBy:
+          type: string
+          example: 507f1f77bcf86cd799439012
+        recipient:
+          type: string
+          example: 507f1f77bcf86cd799439011
+        issueDate:
+          type: string
+          format: date
+          example: 2025-01-01
+      required: [id, title, issuedBy, recipient, issueDate]
+    CertificationInput:
+      type: object
+      properties:
+        title:
+          type: string
+        issuedBy:
+          type: string
+        recipient:
+          type: string
+        issueDate:
+          type: string
+          format: date
+      required: [title, issuedBy, recipient, issueDate]
+    Topic:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 507f1f77bcf86cd799439015
+        name:
+          type: string
+          example: Math
+        description:
+          type: string
+          example: Mathematics basics
+        levels:
+          type: integer
+          example: 3
+        isActive:
+          type: boolean
+          example: true
+        documentUrl:
+          type: string
+          format: uri
+          example: https://example.com/doc.pdf
+      required: [id, name, description, levels, isActive]
+    TopicInput:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        levels:
+          type: integer
+        isActive:
+          type: boolean
+      required: [name, description, levels, isActive]
+    AuthTokens:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+      required: [accessToken, refreshToken]
+    AccessToken:
+      type: object
+      properties:
+        accessToken:
+          type: string
+      required: [accessToken]
+    LoginInput:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required: [email, password]
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
