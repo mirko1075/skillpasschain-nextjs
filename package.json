@@ -1,7 +1,11 @@
 {
-  "name": "nextjs",
+  "name": "skillpasschain-nextjs",
   "version": "0.1.0",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:mirko1075/skillpasschain-nextjs.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "NODE_OPTIONS=--max-old-space-size=4096 next build",
