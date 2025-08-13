@@ -72,6 +72,13 @@ class ApiService {
     });
   }
 
+  async createAdminUser(data: any) {
+    return this.request('/users/create-admin', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
   async updateUser(id: string, data: any) {
     return this.request(`/users/${id}`, {
       method: 'PUT',
