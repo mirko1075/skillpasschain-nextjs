@@ -60,6 +60,8 @@ export function AdminDashboard() {
   const [isCreateTopicOpen, setIsCreateTopicOpen] = useState(false);
   const [isEditTopicOpen, setIsEditTopicOpen] = useState(false);
   const [editingTopic, setEditingTopic] = useState<Topic | null>(null);
+  const [isEditUserOpen, setIsEditUserOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newUser, setNewUser] = useState({
     firstName: '',
     lastName: '',
@@ -80,6 +82,46 @@ export function AdminDashboard() {
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { toast } = useToast();
+
+  const handleEditUser = (user: User) => {
+    setEditingUser({
+      ...user,
+      password: '' // Don't pre-fill password for security
+    });
+    setIsEditUserOpen(true);
+  };
+
+  const handleUpdateUser = async () => {
+    if (!editingUser) return;
+    
+    try {
+      // Only include password in update if it's been changed
+      const updateData = {
+        firstName: editingUser.firstName,
+        lastName: editingUser.lastName,
+        email: editingUser.email,
+        role: editingUser.role,
+        ...(editingUser.password && { password: editingUser.password })
+      };
+      
+      const updatedUser = await apiService.updateUser(editingUser.id, updateData);
+      setUsers(users.map(user => 
+        user.id === editingUser.id ? updatedUser : user
+      ));
+      setEditingUser(null);
+      setIsEditUserOpen(false);
+      toast({
+        title: "User updated",
+        description: "The user has been successfully updated.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update user.",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
