@@ -864,6 +864,95 @@ export function AdminDashboard() {
             </Button>
           </DialogContent>
         </Dialog>
+
+        {/* Edit User Dialog */}
+        <Dialog open={isEditUserOpen} onOpenChange={setIsEditUserOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit User</DialogTitle>
+            </DialogHeader>
+            {editingUser && (
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="editFirstName">First Name</Label>
+                  <Input 
+                    id="editFirstName"
+                    placeholder="First Name" 
+                    value={editingUser.firstName}
+                    onChange={(e) => setEditingUser(prev => prev ? { ...prev, firstName: e.target.value } : null)}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="editLastName">Last Name</Label>
+                  <Input 
+                    id="editLastName"
+                    placeholder="Last Name" 
+                    value={editingUser.lastName}
+                    onChange={(e) => setEditingUser(prev => prev ? { ...prev, lastName: e.target.value } : null)}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="editEmail">Email</Label>
+                  <Input 
+                    id="editEmail"
+                    placeholder="Email" 
+                    type="email" 
+                    value={editingUser.email}
+                    onChange={(e) => setEditingUser(prev => prev ? { ...prev, email: e.target.value } : null)}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="editPassword">New Password (leave blank to keep current)</Label>
+                  <Input 
+                    id="editPassword"
+                    placeholder="New Password" 
+                    type="password" 
+                    value={editingUser.password}
+                    onChange={(e) => setEditingUser(prev => prev ? { ...prev, password: e.target.value } : null)}
+                  />
+                  <p className="text-xs text-gray-500">
+                    Leave empty to keep the current password unchanged
+                  </p>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="editRole">Role</Label>
+                  <Select 
+                    value={editingUser.role} 
+                    onValueChange={(value) => setEditingUser(prev => prev ? { ...prev, role: value } : null)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">User/Student</SelectItem>
+                      <SelectItem value="institution">Institution</SelectItem>
+                      <SelectItem value="admin">Administrator</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            <div className="flex space-x-2">
+              <Button 
+                className="flex-1" 
+                onClick={handleUpdateUser}
+                disabled={!editingUser?.firstName || !editingUser?.lastName || !editingUser?.email}
+              >
+                Update User
+              </Button>
+              <Button 
+                variant="outline" 
+                className="flex-1"
+                onClick={() => {
+                  setEditingUser(null);
+                  setIsEditUserOpen(false);
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );
