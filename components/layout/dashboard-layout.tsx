@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/providers/auth-provider';
+import { apiService } from '@/services/api.service';
 import { 
   Shield, 
   Menu, 
@@ -116,7 +117,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="p-4 border-t">
         <div className="flex items-center space-x-3 px-3 py-2">
           <Avatar className="w-8 h-8">
-            <AvatarImage src="/api/placeholder/32/32" />
+            <AvatarImage 
+              src={user?._id ? apiService.getAvatarUrl(user._id) : undefined}
+              alt={`${user?.firstName} ${user?.lastName}`}
+            />
             <AvatarFallback>
               {user?.firstName?.[0]}{user?.lastName?.[0]}
             </AvatarFallback>
@@ -167,7 +171,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2">
                   <Avatar className="w-8 h-8">
-                    <AvatarImage src="/api/placeholder/32/32" />
+                    <AvatarImage 
+                      src={user?._id ? apiService.getAvatarUrl(user._id) : undefined}
+                      alt={`${user?.firstName} ${user?.lastName}`}
+                    />
                     <AvatarFallback>
                       {user?.firstName?.[0]}{user?.lastName?.[0]}
                     </AvatarFallback>

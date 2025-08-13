@@ -92,6 +92,37 @@ class ApiService {
     });
   }
 
+  // Avatar management
+  async uploadAvatar(userId: string, file: File) {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    const response = await fetch(`${API_BASE}/users/${userId}/avatar`, {
+      method: 'POST',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Avatar upload failed: ${response.statusText}`);
+    }
+    
+    return response.json();
+  }
+
+  async deleteAvatar(userId: string) {
+    return this.request(`/users/${userId}/avatar`, {
+      method: 'DELETE',
+    });
+  }
+
+  getAvatarUrl(userId: string) {
+    return `${API_BASE}/users/${userId}/avatar`;
+  }
+
   // Institutions
   async getInstitutions() {
     return this.request('/institutions');
