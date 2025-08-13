@@ -62,17 +62,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async () => {
       const token = localStorage.getItem('accessToken');
       const userData = localStorage.getItem('userData');
-      // If we have a token, always try to refresh it for session persistence
+      // If we have a token, check if it's expired
       if (token) {
-        const refreshed = await refreshUserSession();
-        if (refreshed) {
-          setLoading(false);
-          return;
+        if (!isTokenExpired(token)) {
+          // Token is valid, restore user from localStorage
+          if (userData && userData !== 'undefined') {
+            try {
+              const parsedUser = JSON.parse(userData);
+              setUser(parsedUser);
+              setLoading(false);
+              return;
+            } catch (error) {
+              console.error('Error parsing stored user data:', error);
+              localStorage.removeItem('userData');
+            }
+          }
         } else {
-          // If refresh fails, clear everything
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('userData');
+          // Token expired, try to refresh
+          const refreshed = await refreshUserSession();
+          if (refreshed) {
+            setLoading(false);
+            return;
+          } else {
+            // If refresh fails, clear everything
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('userData');
+          }
         }
       }
       // If no token or refresh failed, try to restore user from userData (for SSR or fallback)
