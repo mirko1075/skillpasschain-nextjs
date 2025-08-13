@@ -26,7 +26,9 @@ class ApiService {
           const refreshResponse = await authService.refreshToken(refreshToken);
           if (refreshResponse.data && refreshResponse.data.accessToken) {
             localStorage.setItem('accessToken', refreshResponse.data.accessToken);
-            localStorage.setItem('refreshToken', refreshResponse.data.refreshToken);
+            if (refreshResponse.data.refreshToken) {
+              localStorage.setItem('refreshToken', refreshResponse.data.refreshToken);
+            }
             if (refreshResponse.data.user) {
               localStorage.setItem('userData', JSON.stringify(refreshResponse.data.user));
             }
@@ -39,11 +41,14 @@ class ApiService {
             response = await fetch(url, config);
           }
         } catch (error) {
+          console.error('Token refresh failed in API service:', error);
           // Refresh failed, redirect to login
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
           localStorage.removeItem('userData');
-          window.location.href = '/login';
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
           throw new Error('Session expired');
         }
       }

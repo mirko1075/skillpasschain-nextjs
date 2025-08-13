@@ -45,11 +45,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const response = await authService.refreshToken(refreshToken);
-      if (response.data && response.data.user && response.data.accessToken) {
-        setUser(response.data.user);
+      if (response.data && response.data.accessToken) {
         localStorage.setItem('accessToken', response.data.accessToken);
-        localStorage.setItem('refreshToken', response.data.refreshToken);
-        localStorage.setItem('userData', JSON.stringify(response.data.user));
+        if (response.data.refreshToken) {
+          localStorage.setItem('refreshToken', response.data.refreshToken);
+        }
+        if (response.data.user) {
+          setUser(response.data.user);
+          localStorage.setItem('userData', JSON.stringify(response.data.user));
+        }
         return true;
       }
     } catch (error) {
@@ -58,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('userData');
+      setUser(null);
     }
     return false;
   };
@@ -65,6 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async () => {
       const token = localStorage.getItem('accessToken');
       const userData = localStorage.getItem('userData');
+      
       // If we have a token, check if it's expired
       if (token) {
         if (!isTokenExpired(token)) {
@@ -73,8 +79,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             try {
               const parsedUser = JSON.parse(userData);
               setUser(parsedUser);
-              setLoading(false);
-              return;
             } catch (error) {
               console.error('Error parsing stored user data:', error);
               localStorage.removeItem('userData');
@@ -82,20 +86,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         } else {
           // Token expired, try to refresh
+          console.log('Token expired, attempting refresh...');
           const refreshed = await refreshUserSession();
-          if (refreshed) {
-            setLoading(false);
-            return;
-          } else {
+          if (!refreshed) {
             // If refresh fails, clear everything
+            console.log('Token refresh failed, clearing session');
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('userData');
+            setUser(null);
           }
         }
-      }
-      // If no token or refresh failed, try to restore user from userData (for SSR or fallback)
-      if (userData && userData !== 'undefined') {
+      } else if (userData && userData !== 'undefined') {
+        // If no token but we have user data, try to restore (but user will need to login again for API calls)
         try {
           const parsedUser = JSON.parse(userData);
           setUser(parsedUser);
@@ -104,6 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.removeItem('userData');
         }
       }
+      
       setLoading(false);
     };
 
@@ -114,29 +118,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!user) return;
 
-    const checkTokenExpiry = async () => {
+    const setupTokenRefresh = () => {
       const token = localStorage.getItem('accessToken');
-      if (token && isTokenExpired(token)) {
-        const refreshed = await refreshUserSession();
-        if (!refreshed) {
-          logout();
+      if (!token) return;
+
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const expiryTime = payload.exp * 1000;
+        const currentTime = Date.now();
+        const timeUntilExpiry = expiryTime - currentTime;
+        
+        // If token expires in less than 5 minutes, refresh it now
+        if (timeUntilExpiry < 5 * 60 * 1000) {
+          refreshUserSession().then(refreshed => {
+            if (!refreshed) {
+              logout();
+            }
+          });
+        } else {
+          // Set up refresh 5 minutes before expiry
+          const refreshTime = timeUntilExpiry - 5 * 60 * 1000;
+          setTimeout(() => {
+            refreshUserSession().then(refreshed => {
+              if (!refreshed) {
+                logout();
+              }
+            });
+          }, refreshTime);
         }
+      } catch (error) {
+        console.error('Error setting up token refresh:', error);
       }
     };
 
-    // Check token expiry every 5 minutes
-    const interval = setInterval(checkTokenExpiry, 5 * 60 * 1000);
+    setupTokenRefresh();
     
-    return () => clearInterval(interval);
+    // Also check every 5 minutes as a fallback
+    const interval = setInterval(() => {
+      const token = localStorage.getItem('accessToken');
+      if (token && isTokenExpired(token)) {
+        refreshUserSession().then(refreshed => {
+          if (!refreshed) {
+            logout();
+          }
+        });
+      }
+    }, 5 * 60 * 1000);
+    
+    return () => {
+      clearInterval(interval);
+    };
   }, [user]);
   const login = async (email: string, password: string) => {
-    const {data} = await authService.login(email, password);
+    const { data } = await authService.login(email, password);
     if (data.user && data.accessToken) {
       setUser(data.user);
       localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
+      if (data.refreshToken) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+      }
       localStorage.setItem('userData', JSON.stringify(data.user));
-      debugger;
+      
       // Redirect based on user role using Next.js router
       const redirectPath = data.user.role === 'admin' 
         ? '/dashboard/admin' 
@@ -152,7 +194,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (response.user && response.accessToken) {
       setUser(response.user);
       localStorage.setItem('accessToken', response.accessToken);
-      localStorage.setItem('refreshToken', response.refreshToken);
+      if (response.refreshToken) {
+        localStorage.setItem('refreshToken', response.refreshToken);
+      }
       localStorage.setItem('userData', JSON.stringify(response.user));
     }
   };
