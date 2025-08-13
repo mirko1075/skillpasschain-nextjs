@@ -14,6 +14,7 @@ import { Award, Users, FileText, TrendingUp, Plus, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export function InstitutionDashboard() {
+  const { user } = useAuth();
   const [certifications, setCertifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -65,7 +66,11 @@ export function InstitutionDashboard() {
 
   const handleIssueCertification = async (certificationData: any) => {
     try {
-      await apiService.createCertification(certificationData);
+      const certData = {
+        ...certificationData,
+        issuedBy: user?._id
+      };
+      await apiService.createCertification(certData);
       toast({
         title: "Certification issued",
         description: "The certification has been successfully issued.",

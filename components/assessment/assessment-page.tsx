@@ -16,6 +16,7 @@ interface AssessmentPageProps {
 }
 
 export function AssessmentPage({ assessmentId }: AssessmentPageProps) {
+  const { user } = useAuth();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [timeLeft, setTimeLeft] = useState(2700); // 45 minutes in seconds
@@ -84,7 +85,12 @@ export function AssessmentPage({ assessmentId }: AssessmentPageProps) {
       const score = Math.round((correct / assessment.questions.length) * 100);
       
       // Here you would typically call your API to submit the assessment
-      // await apiService.completeAssessment(assessmentId, score);
+      const assessmentData = {
+        score,
+        takenBy: user?._id,
+        createdBy: user?._id
+      };
+      // await apiService.completeAssessment(assessmentId, assessmentData);
       
       toast({
         title: "Assessment completed!",

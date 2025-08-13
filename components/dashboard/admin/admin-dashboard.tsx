@@ -44,6 +44,7 @@ interface Topic {
 }
 
 export function AdminDashboard() {
+  const { user } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -177,11 +178,15 @@ export function AdminDashboard() {
 
   const handleCreateUser = async () => {
     try {
+      const userData = {
+        ...newUser,
+        createdBy: user?._id
+      };
       let createdUser;
       if (newUser.role === 'admin') {
-        createdUser = await apiService.createAdminUser(newUser);
+        createdUser = await apiService.createAdminUser(userData);
       } else {
-        createdUser = await apiService.createUser(newUser);
+        createdUser = await apiService.createUser(userData);
       }
       setUsers([...users, createdUser]);
       setStats(prev => ({ ...prev, totalUsers: prev.totalUsers + 1 }));
@@ -208,7 +213,11 @@ export function AdminDashboard() {
 
   const handleCreateInstitution = async () => {
     try {
-      const createdInstitution = await apiService.createInstitution(newInstitution);
+      const institutionData = {
+        ...newInstitution,
+        createdBy: user?._id
+      };
+      const createdInstitution = await apiService.createInstitution(institutionData);
       setInstitutions([...institutions, createdInstitution]);
       setStats(prev => ({ ...prev, totalInstitutions: prev.totalInstitutions + 1 }));
       setNewInstitution({
@@ -232,7 +241,11 @@ export function AdminDashboard() {
 
   const handleCreateTopic = async () => {
     try {
-      const createdTopic = await apiService.createTopic(newTopic);
+      const topicData = {
+        ...newTopic,
+        createdBy: user?._id
+      };
+      const createdTopic = await apiService.createTopic(topicData);
       
       // Upload document if selected
       if (selectedFile) {
