@@ -102,6 +102,7 @@ export function AdminDashboard() {
         lastName: editingUser.lastName,
         email: editingUser.email,
         role: editingUser.role,
+        updatedBy: user?._id,
         ...(editingUser.password && { password: editingUser.password })
       };
       
@@ -279,7 +280,11 @@ export function AdminDashboard() {
     if (!editingTopic) return;
     
     try {
-      const updatedTopic = await apiService.updateTopic(editingTopic.id, editingTopic);
+      const updateData = {
+        ...editingTopic,
+        updatedBy: user?._id
+      };
+      const updatedTopic = await apiService.updateTopic(editingTopic.id, updateData);
       
       // Upload document if selected
       if (selectedFile) {

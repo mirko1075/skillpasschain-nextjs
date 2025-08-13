@@ -249,9 +249,25 @@ class ApiService {
   }
 
   async updateTopicStatus(id: string, isActive: boolean) {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    let userId = null;
+    
+    // Extract user ID from token for updatedBy field
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        userId = payload.userId || payload.id || payload.sub;
+      } catch (error) {
+        console.error('Error extracting user ID from token:', error);
+      }
+    }
+    
     return this.request(`/topics/${id}/active`, {
       method: 'PATCH',
-      body: JSON.stringify({ isActive }),
+      body: JSON.stringify({ 
+        isActive,
+        updatedBy: userId
+      }),
     });
   }
 }
