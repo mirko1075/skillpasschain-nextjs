@@ -118,7 +118,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="flex items-center space-x-3 px-3 py-2">
           <Avatar className="w-8 h-8">
             <AvatarImage 
-              src={user?._id ? apiService.getAvatarUrl(user._id) : undefined}
+              src={user?._id ? user.avatarUrl : ''}
               alt={`${user?.firstName} ${user?.lastName}`}
             />
             <AvatarFallback>
@@ -172,7 +172,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <Button variant="ghost" className="flex items-center space-x-2">
                   <Avatar className="w-8 h-8">
                     <AvatarImage 
-                      src={user?._id ? apiService.getAvatarUrl(user._id) : undefined}
+                      src={user?._id ? user.avatarUrl : ''}
                       alt={`${user?.firstName} ${user?.lastName}`}
                     />
                     <AvatarFallback>

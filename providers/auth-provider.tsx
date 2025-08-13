@@ -9,7 +9,10 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
-  role: 'user' | 'admin' | 'institution';
+  password: string;
+  role: 'student' | 'institution_admin' | 'admin' | 'institution';
+  avatarUrl: string,
+  refreshToken?: string; // Optional for storing refresh token
 }
 
 interface AuthContextType {

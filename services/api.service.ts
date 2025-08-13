@@ -119,7 +119,7 @@ class ApiService {
     });
   }
 
-  getAvatarUrl(userId: string) {
+  async getAvatarUrl(userId: string) {
     return `${API_BASE}/users/${userId}/avatar`;
   }
 
