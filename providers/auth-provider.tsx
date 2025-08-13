@@ -117,7 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('refreshToken', data.refreshToken);
       localStorage.setItem('userData', JSON.stringify(data.user));
-
+      debugger;
       // Redirect based on user role using Next.js router
       const redirectPath = data.user.role === 'admin' 
         ? '/dashboard/admin' 

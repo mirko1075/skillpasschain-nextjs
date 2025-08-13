@@ -14,7 +14,7 @@ export const authService = {
       throw new Error('Login failed');
     }
 
-    const data = await response.json();
+    const {data} = await response.json();
     return { data }; // Wrap in data object to match expected format
   },
 
