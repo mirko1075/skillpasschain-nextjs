@@ -135,7 +135,12 @@ export function AdminDashboard() {
 
   const handleCreateUser = async () => {
     try {
-      const createdUser = await apiService.createUser(newUser);
+      let createdUser;
+      if (newUser.role === 'admin') {
+        createdUser = await apiService.createAdminUser(newUser);
+      } else {
+        createdUser = await apiService.createUser(newUser);
+      }
       setUsers([...users, createdUser]);
       setStats(prev => ({ ...prev, totalUsers: prev.totalUsers + 1 }));
       setNewUser({
@@ -147,7 +152,7 @@ export function AdminDashboard() {
       });
       setIsCreateUserOpen(false);
       toast({
-        title: "User created",
+        title: newUser.role === 'admin' ? "Admin created" : "User created",
         description: "The user has been successfully created.",
       });
     } catch (error) {

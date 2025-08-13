@@ -11,10 +11,13 @@ import { useAuth } from '@/providers/auth-provider';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { BookOpen, Award, TrendingUp, Calendar } from 'lucide-react';
+import { Certification } from '@/models/certification.model';
+import { Assessment } from '@/models/assessment.model';
 
 export function UserDashboard() {
-  const [assessments, setAssessments] = useState([]);
-  const [certifications, setCertifications] = useState([]);
+  const [assessments, setAssessments] = useState<Assessment[]>([]);
+
+  const [certifications, setCertifications] = useState<Certification[]>([]);
   const [stats, setStats] = useState({
     totalAssessments: 0,
     totalCertifications: 0,
@@ -146,11 +149,11 @@ export function UserDashboard() {
               ) : (
               <div className="space-y-4">
                 {assessments.length > 0 ? assessments.map((assessment) => (
-                  <div key={assessment.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div key={assessment._id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex-1">
-                      <h3 className="font-medium">{assessment.title}</h3>
+                      <h3 className="font-medium">{assessment.topic}</h3>
                       <p className="text-sm text-gray-600">
-                        {assessment.status === 'completed' ? `Completed on ${assessment.date}` : 'Not started'}
+                        {assessment.status === 'completed' ? `Completed on ${assessment.completedAt}` : 'Not started'}
                       </p>
                       {assessment.status === 'completed' && (
                         <div className="mt-2">
@@ -194,11 +197,11 @@ export function UserDashboard() {
               ) : (
               <div className="space-y-4">
                 {certifications.length > 0 ? certifications.map((cert) => (
-                  <div key={cert.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div key={cert._id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <h3 className="font-medium">{cert.title}</h3>
-                      <p className="text-sm text-gray-600">Issued by {cert.institution}</p>
-                      <p className="text-sm text-gray-500">Earned on {cert.issueDate || cert.date}</p>
+                      <p className="text-sm text-gray-600">Issued by {cert.issuedBy}</p>
+                      <p className="text-sm text-gray-500">Earned on {cert.issueDate.toLocaleDateString()}</p>
                     </div>
                     <Button variant="outline" size="sm">
                       View
