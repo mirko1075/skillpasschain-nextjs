@@ -15,33 +15,12 @@ import { Users, Building2, Award, BookOpen, Plus, Edit, Trash2 } from 'lucide-re
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/providers/auth-provider';
+import { Institution } from '@/models/institution.model';
+import { Topic } from '@/models/topic.model';
+import { User } from '@/models/user.model';
 
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-  createdAt: string;
-}
 
-interface Institution {
-  id: string;
-  name: string;
-  email: string;
-  address: string;
-  createdAt: string;
-}
-
-interface Topic {
-  id: string;
-  name: string;
-  description: string;
-  levels: number;
-  isActive: boolean;
-  documentUrl?: string;
-  createdAt: string;
-}
 
 export function AdminDashboard() {
   const { user } = useAuth();
@@ -84,14 +63,6 @@ export function AdminDashboard() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { toast } = useToast();
 
-  const handleEditUser = (user: User) => {
-    setEditingUser({
-      ...user,
-      password: '' // Don't pre-fill password for security
-    });
-    setIsEditUserOpen(true);
-  };
-
   const handleUpdateUser = async () => {
     if (!editingUser) return;
     
@@ -106,9 +77,9 @@ export function AdminDashboard() {
         ...(editingUser.password && { password: editingUser.password })
       };
       
-      const updatedUser = await apiService.updateUser(editingUser.id, updateData);
+      const updatedUser = await apiService.updateUser(editingUser._id, updateData);
       setUsers(users.map(user => 
-        user.id === editingUser.id ? updatedUser : user
+        user._id === editingUser._id ? updatedUser : user
       ));
       setEditingUser(null);
       setIsEditUserOpen(false);
@@ -163,7 +134,7 @@ export function AdminDashboard() {
   const handleDeleteUser = async (userId: string) => {
     try {
       await apiService.deleteUser(userId);
-      setUsers(users.filter(user => user.id !== userId));
+      setUsers(users.filter(user => user._id !== userId));
       toast({
         title: "User deleted",
         description: "The user has been successfully deleted.",
@@ -284,15 +255,15 @@ export function AdminDashboard() {
         ...editingTopic,
         updatedBy: user?._id
       };
-      const updatedTopic = await apiService.updateTopic(editingTopic.id, updateData);
+      const updatedTopic = await apiService.updateTopic(editingTopic._id, updateData);
       
       // Upload document if selected
       if (selectedFile) {
-        await apiService.uploadTopicDocument(editingTopic.id, selectedFile);
+        await apiService.uploadTopicDocument(editingTopic._id, selectedFile);
       }
       
       setTopics(topics.map(topic => 
-        topic.id === editingTopic.id ? updatedTopic : topic
+        topic._id === editingTopic._id ? updatedTopic : topic
       ));
       setEditingTopic(null);
       setSelectedFile(null);
@@ -313,7 +284,7 @@ export function AdminDashboard() {
   const handleDeleteTopic = async (topicId: string) => {
     try {
       await apiService.deleteTopic(topicId);
-      setTopics(topics.filter(topic => topic.id !== topicId));
+      setTopics(topics.filter(topic => topic._id !== topicId));
       setStats(prev => ({ ...prev, totalTopics: prev.totalTopics - 1 }));
       toast({
         title: "Topic deleted",
@@ -493,9 +464,10 @@ export function AdminDashboard() {
                             <SelectValue placeholder="Select role" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="user">User/Student</SelectItem>
+                            <SelectItem value="student">User/Student</SelectItem>
                             <SelectItem value="institution">Institution</SelectItem>
                             <SelectItem value="admin">Administrator</SelectItem>
+                            <SelectItem value="institution_admin">Institution Admin</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -527,7 +499,7 @@ export function AdminDashboard() {
                 </TableHeader>
                 <TableBody>
                   {users.map((user) => (
-                    <TableRow key={user.id}>
+                    <TableRow key={user._id}>
                       <TableCell className="font-medium">
                         {user.firstName} {user.lastName}
                       </TableCell>
@@ -537,7 +509,7 @@ export function AdminDashboard() {
                           {user.role}
                         </Badge>
                       </TableCell>
-                      <TableCell>{user.createdAt}</TableCell>
+                      <TableCell>{user.createdAt.toISOString()}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button variant="outline" size="sm">
@@ -546,7 +518,7 @@ export function AdminDashboard() {
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            onClick={() => handleDeleteUser(user.id)}
+                            onClick={() => handleDeleteUser(user._id)}
                             className="text-red-600 hover:text-red-700"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -637,11 +609,11 @@ export function AdminDashboard() {
                 </TableHeader>
                 <TableBody>
                   {institutions.map((institution) => (
-                    <TableRow key={institution.id}>
+                    <TableRow key={institution._id}>
                       <TableCell className="font-medium">{institution.name}</TableCell>
                       <TableCell>{institution.email}</TableCell>
                       <TableCell>{institution.address}</TableCell>
-                      <TableCell>{institution.createdAt}</TableCell>
+                      <TableCell>{institution.createdAt.toISOString()}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button variant="outline" size="sm">
@@ -764,7 +736,7 @@ export function AdminDashboard() {
                 </TableHeader>
                 <TableBody>
                   {topics.map((topic) => (
-                    <TableRow key={topic.id}>
+                    <TableRow key={topic._id}>
                       <TableCell className="font-medium">{topic.name}</TableCell>
                       <TableCell className="max-w-xs truncate">{topic.description}</TableCell>
                       <TableCell>{topic.levels}</TableCell>
@@ -774,9 +746,9 @@ export function AdminDashboard() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {topic.documentUrl ? (
+                        {topic.referenceDocumentUrl ? (
                           <Button variant="outline" size="sm" asChild>
-                            <a href={topic.documentUrl} target="_blank" rel="noopener noreferrer">
+                            <a href={topic.referenceDocumentUrl} target="_blank" rel="noopener noreferrer">
                               View
                             </a>
                           </Button>
@@ -784,7 +756,7 @@ export function AdminDashboard() {
                           <span className="text-gray-400">None</span>
                         )}
                       </TableCell>
-                      <TableCell>{topic.createdAt}</TableCell>
+                      <TableCell>{topic.createdAt.toISOString()}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button 
@@ -797,7 +769,7 @@ export function AdminDashboard() {
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            onClick={() => handleDeleteTopic(topic.id)}
+                            onClick={() => handleDeleteTopic(topic._id)}
                             className="text-red-600 hover:text-red-700"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -935,8 +907,7 @@ export function AdminDashboard() {
                 <div className="grid gap-2">
                   <Label htmlFor="editRole">Role</Label>
                   <Select 
-                    value={editingUser.role} 
-                    onValueChange={(value) => setEditingUser(prev => prev ? { ...prev, role: value } : null)}
+                    onValueChange={(value) => setEditingUser(prev => prev ? { ...prev, role: value as User['role'] } : null)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select role" />
