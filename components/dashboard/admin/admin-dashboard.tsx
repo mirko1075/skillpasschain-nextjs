@@ -183,6 +183,16 @@ export function AdminDashboard() {
     }
   };
 
+  const formatDate = (date: Date) => {
+    if (!(date instanceof Date)) date = new Date(date);
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const day = pad(date.getDate());
+    const month = pad(date.getMonth() + 1);
+    const year = date.getFullYear();
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    return `${day}-${month}-${year} ${hours}:${minutes}`;
+  }
   const handleCreateInstitution = async () => {
     try {
       const institutionData = {
@@ -509,7 +519,9 @@ export function AdminDashboard() {
                           {user.role}
                         </Badge>
                       </TableCell>
-                      <TableCell>{user.createdAt.toISOString()}</TableCell>
+                      <TableCell>
+                        {formatDate(user.createdAt)}
+                      </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button variant="outline" size="sm">
@@ -613,7 +625,7 @@ export function AdminDashboard() {
                       <TableCell className="font-medium">{institution.name}</TableCell>
                       <TableCell>{institution.email}</TableCell>
                       <TableCell>{institution.address}</TableCell>
-                      <TableCell>{institution.createdAt.toISOString()}</TableCell>
+                      <TableCell>{formatDate(user.createdAt)}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button variant="outline" size="sm">
@@ -756,7 +768,9 @@ export function AdminDashboard() {
                           <span className="text-gray-400">None</span>
                         )}
                       </TableCell>
-                      <TableCell>{topic.createdAt.toISOString()}</TableCell>
+                      <TableCell>
+                        {formatDate(user.createdAt)}
+                      </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button 
