@@ -54,7 +54,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           ...baseItems,
           { name: 'Users', href: '/dashboard/admin/users', icon: Users },
           { name: 'Institutions', href: '/dashboard/admin/institutions', icon: Building2 },
-          { name: 'Certifications', href: '/dashboard/admin/certifications', icon: Award },
+          { name: 'Topics', href: '/dashboard/admin/topics', icon: BookOpen },
           { name: 'Settings', href: '/dashboard/admin/settings', icon: Settings },
         ];
       case 'institution':
