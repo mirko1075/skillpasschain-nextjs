@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { apiService } from '@/services/api.service';
+import { userService } from '@/services/user.service';
 import { Users, Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/providers/auth-provider';
@@ -38,7 +38,7 @@ export function AdminUsersPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const usersData = await apiService.getUsers();
+        const usersData = await userService.getUsers();
         setUsers(usersData);
         setFilteredUsers(usersData);
       } catch (error) {
@@ -94,9 +94,9 @@ export function AdminUsersPage() {
       };
       let createdUser;
       if (newUser.role === 'admin') {
-        createdUser = await apiService.createAdminUser(userData);
+        createdUser = await userService.createAdminUser(userData);
       } else {
-        createdUser = await apiService.createUser(userData);
+        createdUser = await userService.createUser(userData);
       }
       setUsers([...users, createdUser]);
       setNewUser({
@@ -138,7 +138,7 @@ export function AdminUsersPage() {
         ...(editingUser.password && { password: editingUser.password })
       };
       
-      const updatedUser = await apiService.updateUser(editingUser._id, updateData);
+      const updatedUser = await userService.updateUser(editingUser._id, updateData);
       setUsers(users.map(user => 
         user._id === editingUser._id ? updatedUser : user
       ));
@@ -161,7 +161,7 @@ export function AdminUsersPage() {
     if (!confirm('Are you sure you want to delete this user?')) return;
     
     try {
-      await apiService.deleteUser(userId);
+      await userService.deleteUser(userId);
       setUsers(users.filter(user => user._id !== userId));
       toast({
         title: "User deleted",

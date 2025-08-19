@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { useAuth } from '@/providers/auth-provider';
 import { useToast } from '@/hooks/use-toast';
-import { apiService } from '@/services/api.service';
+import { userService } from '@/services/user.service';
 import { User, Camera, Upload, Trash2, Edit } from 'lucide-react';
 
 export function UserProfile() {
@@ -60,7 +60,7 @@ export function UserProfile() {
 
     setUploading(true);
     try {
-      await apiService.uploadAvatar(user._id, selectedFile);
+      await userService.uploadAvatar(user._id, selectedFile);
       
       // Force avatar refresh by updating key
       setAvatarKey(prev => prev + 1);
@@ -94,7 +94,7 @@ export function UserProfile() {
 
     setDeleting(true);
     try {
-      await apiService.deleteAvatar(user._id);
+      await userService.deleteAvatar(user._id);
       
       // Force avatar refresh by updating key
       setAvatarKey(prev => prev + 1);
@@ -158,7 +158,7 @@ export function UserProfile() {
               <div className="flex flex-col items-center space-y-4">
                 <Avatar className="w-32 h-32" key={avatarKey}>
                   <AvatarImage 
-                    src={`${apiService.getAvatarUrl(user._id)}?t=${avatarKey}`}
+                    src={`${userService.getAvatarUrl(user._id)}?t=${avatarKey}`}
                     alt={`${user.firstName} ${user.lastName}`}
                   />
                   <AvatarFallback className="text-2xl">

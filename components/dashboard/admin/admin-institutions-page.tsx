@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { apiService } from '@/services/api.service';
+import { institutionService } from '@/services/institution.service';
 import { Building2, Plus, Edit, Trash2, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/providers/auth-provider';
@@ -33,7 +33,7 @@ export function AdminInstitutionsPage() {
   useEffect(() => {
     const fetchInstitutions = async () => {
       try {
-        const institutionsData = await apiService.getInstitutions();
+        const institutionsData = await institutionService.getInstitutions();
         setInstitutions(institutionsData);
         setFilteredInstitutions(institutionsData);
       } catch (error) {
@@ -84,6 +84,7 @@ export function AdminInstitutionsPage() {
         createdBy: user?._id
       };
       const createdInstitution = await apiService.createInstitution(institutionData);
+      const createdInstitution = await institutionService.createInstitution(institutionData);
       setInstitutions([...institutions, createdInstitution]);
       setNewInstitution({
         name: '',
@@ -120,7 +121,7 @@ export function AdminInstitutionsPage() {
         updatedBy: user?._id
       };
       
-      const updatedInstitution = await apiService.updateInstitution(editingInstitution._id, updateData);
+      const updatedInstitution = await institutionService.updateInstitution(editingInstitution._id, updateData);
       setInstitutions(institutions.map(institution => 
         institution._id === editingInstitution._id ? updatedInstitution : institution
       ));
@@ -143,7 +144,7 @@ export function AdminInstitutionsPage() {
     if (!confirm('Are you sure you want to delete this institution?')) return;
     
     try {
-      await apiService.deleteInstitution(institutionId);
+      await institutionService.deleteInstitution(institutionId);
       setInstitutions(institutions.filter(institution => institution._id !== institutionId));
       toast({
         title: "Institution deleted",

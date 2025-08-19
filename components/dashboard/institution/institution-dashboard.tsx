@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { apiService } from '@/services/api.service';
+import { certificationService } from '@/services/certification.service';
 import { useAuth } from '@/providers/auth-provider';
 import { Award, Users, FileText, TrendingUp, Plus, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -22,7 +22,7 @@ export function InstitutionDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const certificationsData = await apiService.getCertifications();
+        const certificationsData = await certificationService.getCertifications();
         setCertifications(certificationsData);
       } catch (error) {
         console.error('Error fetching institution data:', error);
@@ -70,7 +70,7 @@ export function InstitutionDashboard() {
         ...certificationData,
         issuedBy: user?._id
       };
-      await apiService.createCertification(certData);
+      await certificationService.createCertification(certData);
       toast({
         title: "Certification issued",
         description: "The certification has been successfully issued.",

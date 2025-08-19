@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { apiService } from '@/services/api.service';
+import { assessmentService, certificationService } from '@/services';
 import { useAuth } from '@/providers/auth-provider';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -35,8 +35,8 @@ export function UserDashboard() {
       
       try {
         const [userAssessments, userCertifications] = await Promise.all([
-          apiService.getUserAssessments(user._id),
-          apiService.getUserCertifications(user._id)
+          assessmentService.getUserAssessments(user._id),
+          certificationService.getUserCertifications(user._id)
         ]);
         setAssessments(userAssessments);
         setCertifications(userCertifications);

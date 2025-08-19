@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { apiService } from '@/services/api.service';
+import { topicService } from '@/services/topic.service';
 import { BookOpen, Plus, Edit, Trash2, Search, Filter, Upload } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
@@ -40,7 +40,7 @@ export function AdminTopicsPage() {
   useEffect(() => {
     const fetchTopics = async () => {
       try {
-        const topicsData = await apiService.getTopics();
+        const topicsData = await topicService.getTopics();
         setTopics(topicsData);
         setFilteredTopics(topicsData);
       } catch (error) {
@@ -118,10 +118,11 @@ export function AdminTopicsPage() {
         createdBy: user?._id
       };
       const createdTopic = await apiService.createTopic(topicData);
+      const createdTopic = await topicService.createTopic(topicData);
       
       // Upload document if selected
       if (selectedFile) {
-        await apiService.uploadTopicDocument(createdTopic.id, selectedFile);
+        await topicService.uploadTopicDocument(createdTopic.id, selectedFile);
       }
       
       setTopics([...topics, createdTopic]);
@@ -160,10 +161,11 @@ export function AdminTopicsPage() {
         updatedBy: user?._id
       };
       const updatedTopic = await apiService.updateTopic(editingTopic._id, updateData);
+      const updatedTopic = await topicService.updateTopic(editingTopic._id, updateData);
       
       // Upload document if selected
       if (selectedFile) {
-        await apiService.uploadTopicDocument(editingTopic._id, selectedFile);
+        await topicService.uploadTopicDocument(editingTopic._id, selectedFile);
       }
       
       setTopics(topics.map(topic => 
@@ -189,7 +191,7 @@ export function AdminTopicsPage() {
     if (!confirm('Are you sure you want to delete this topic?')) return;
     
     try {
-      await apiService.deleteTopic(topicId);
+      await topicService.deleteTopic(topicId);
       setTopics(topics.filter(topic => topic._id !== topicId));
       toast({
         title: "Topic deleted",
@@ -206,7 +208,7 @@ export function AdminTopicsPage() {
 
   const handleToggleStatus = async (topicId: string, isActive: boolean) => {
     try {
-      await apiService.updateTopicStatus(topicId, isActive);
+      await topicService.updateTopicStatus(topicId, isActive);
       setTopics(topics.map(topic => 
         topic._id === topicId ? { ...topic, isActive } : topic
       ));

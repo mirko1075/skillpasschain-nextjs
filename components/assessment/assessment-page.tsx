@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Clock, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/providers/auth-provider';
+import { assessmentService } from '@/services/assessment.service';
 
 interface AssessmentPageProps {
   assessmentId: string;
@@ -86,11 +88,12 @@ export function AssessmentPage({ assessmentId }: AssessmentPageProps) {
       
       // Here you would typically call your API to submit the assessment
       const assessmentData = {
+        title: assessment.title,
         score,
         takenBy: user?._id,
         createdBy: user?._id
       };
-      // await apiService.completeAssessment(assessmentId, assessmentData);
+      // await assessmentService.createAssessment(assessmentData);
       
       toast({
         title: "Assessment completed!",

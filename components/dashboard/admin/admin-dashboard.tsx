@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { apiService } from '@/services/api.service';
+import { userService, institutionService, assessmentService, certificationService, topicService } from '@/services';
 import { Users, Building2, Award, BookOpen, ArrowRight, TrendingUp, Calendar, Activity } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/providers/auth-provider';
@@ -38,11 +38,11 @@ export function AdminDashboard() {
     const fetchData = async () => {
       try {
         const [usersData, institutionsData, assessmentsData, certificationsData, topicsData] = await Promise.all([
-          apiService.getUsers(),
-          apiService.getInstitutions(),
-          apiService.getAssessments(),
-          apiService.getCertifications(),
-          apiService.getTopics()
+          userService.getUsers(),
+          institutionService.getInstitutions(),
+          assessmentService.getAssessments(),
+          certificationService.getCertifications(),
+          topicService.getTopics()
         ]);
         
         setUsers(usersData);
